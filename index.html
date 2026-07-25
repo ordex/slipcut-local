@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Dividi un PDF di cedolini in un file per dipendente e prepara i pagamenti. Tutto nel browser: nessun caricamento, nessun cookie."
+    />
+    <title>SlipCut Local</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap header-row">
+        <h1 class="brand">SlipCut&nbsp;Local</h1>
+        <p class="privacy-pill" title="L'elaborazione avviene interamente in questa pagina">
+          I file restano nel browser · 0 cookie
+        </p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <p class="lead">
+        Un PDF con tutti i cedolini del mese diventa un archivio con un file per persona, più i
+        tracciati da consegnare alla banca. Niente viene caricato da nessuna parte.
+      </p>
+
+      <!-- 1. Upload ------------------------------------------------------- -->
+      <section class="panel" aria-labelledby="upload-title">
+        <h2 id="upload-title">1. Carica il PDF</h2>
+
+        <div id="drop-zone" class="drop-zone" tabindex="0" role="button"
+             aria-describedby="upload-hint">
+          <p class="drop-zone-main">Trascina qui il PDF dei cedolini</p>
+          <p class="drop-zone-alt">oppure</p>
+          <button id="pick-file" class="button" type="button">Scegli un file</button>
+          <input id="file-input" type="file" accept="application/pdf,.pdf" class="visually-hidden" />
+        </div>
+        <p id="upload-hint" class="hint">Massimo 10 MB e 250 pagine. Il file non lascia il browser.</p>
+
+        <p id="file-status" class="status" role="status" aria-live="polite"></p>
+
+        <div id="progress" class="progress hidden">
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+          <span id="progress-label" class="progress-label">0%</span>
+        </div>
+      </section>
+
+      <!-- 2. Extraction --------------------------------------------------- -->
+      <section id="extraction-section" class="panel hidden" aria-labelledby="extraction-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="extraction-title">2. Controlla l'estrazione</h2>
+            <p id="extraction-summary" class="hint"></p>
+          </div>
+          <div class="actions">
+            <button id="download-archive" class="button primary" type="button">Scarica archivio</button>
+            <button id="download-summary" class="button" type="button">Riepilogo CSV</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Pag.</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Codice Fiscale</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Periodo</th>
+                <th scope="col" class="numeric">Netto</th>
+                <th scope="col" class="numeric">Conf.</th>
+                <th scope="col">Note</th>
+              </tr>
+            </thead>
+            <tbody id="extraction-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 3. Payments ----------------------------------------------------- -->
+      <section id="payment-section" class="panel hidden" aria-labelledby="payment-title">
+        <h2 id="payment-title">3. Prepara i pagamenti</h2>
+        <p class="hint">
+          Il cedolino non contiene l'IBAN: va inserito una volta e resta riutilizzabile. La rubrica
+          si salva solo in questo browser, se lo chiedi tu.
+        </p>
+
+        <div class="field-grid">
+          <div class="field">
+            <span class="field-label">Rubrica Codice Fiscale → IBAN</span>
+            <p id="address-book-summary" class="hint"></p>
+            <div class="actions">
+              <button id="open-address-book" class="button primary" type="button">
+                Gestisci rubrica
+              </button>
+              <button id="import-address-book" class="button" type="button">Importa CSV</button>
+              <input id="address-book-file" type="file" accept=".csv,text/csv" class="visually-hidden" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="remittance-template">Causale</label>
+            <input id="remittance-template" type="text" value="Stipendio {period}" />
+            <p class="hint">
+              Segnaposto: <code>{period}</code>, <code>{name}</code>, <code>{cf}</code>.
+            </p>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Formato di esportazione">
+          <button id="tab-csv" class="tab" type="button" role="tab" aria-selected="true"
+                  aria-controls="panel-csv">CSV</button>
+          <button id="tab-xml" class="tab" type="button" role="tab" aria-selected="false"
+                  aria-controls="panel-xml">XML SEPA</button>
+        </div>
+
+        <div id="panel-csv" class="tab-panel" role="tabpanel" aria-labelledby="tab-csv">
+          <div class="field">
+            <label class="field-label" for="csv-template">Tracciato</label>
+            <select id="csv-template"></select>
+            <p id="csv-template-description" class="hint"></p>
+          </div>
+
+          <details class="editor">
+            <summary>Tracciati personalizzati</summary>
+            <p class="hint">
+              Ogni colonna usa <code>source</code> oppure un valore <code>fixed</code>. La
+              configurazione si salva in questo browser.
+            </p>
+            <textarea id="csv-template-editor" rows="14" spellcheck="false"></textarea>
+            <div class="actions">
+              <button id="save-templates" class="button primary" type="button">Salva</button>
+              <button id="load-templates-file" class="button" type="button">Carica JSON</button>
+              <button id="export-templates" class="button" type="button">Esporta JSON</button>
+              <button id="reset-templates" class="button" type="button">Ripristina</button>
+              <input id="templates-file" type="file" accept="application/json,.json" class="visually-hidden" />
+            </div>
+            <p id="templates-message" class="status" role="status" aria-live="polite"></p>
+          </details>
+        </div>
+
+        <div id="panel-xml" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-xml">
+          <div class="field">
+            <label class="field-label" for="xml-profile">Profilo</label>
+            <select id="xml-profile"></select>
+            <p id="xml-profile-hint" class="hint"></p>
+          </div>
+
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">Ragione sociale ordinante</span>
+              <input id="debtor-name" type="text" autocomplete="organization" />
+            </label>
+            <label class="field">
+              <span class="field-label">IBAN ordinante</span>
+              <input id="debtor-iban" type="text" inputmode="latin" spellcheck="false" placeholder="IT…" />
+            </label>
+            <label class="field">
+              <span class="field-label">BIC <span class="optional">(opzionale)</span></span>
+              <input id="debtor-bic" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span class="field-label">CUC CBI <span class="optional">(se richiesto)</span></span>
+              <input id="debtor-cuc" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span class="field-label">ABI <span class="optional">(se richiesto)</span></span>
+              <input id="debtor-abi" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span class="field-label">Data di esecuzione</span>
+              <input id="execution-date" type="date" />
+            </label>
+            <label class="field">
+              <span class="field-label">Message ID</span>
+              <input id="message-id" type="text" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span class="field-label">Payment Info ID</span>
+              <input id="payment-info-id" type="text" spellcheck="false" />
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="save-settings" class="button primary" type="button">Salva impostazioni</button>
+            <button id="clear-settings" class="button" type="button">Cancella impostazioni</button>
+          </div>
+          <p id="settings-message" class="status" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="actions payment-actions">
+          <button id="build-payments" class="button primary" type="button">Prepara pagamenti</button>
+          <button id="download-csv" class="button" type="button" disabled>Scarica CSV</button>
+          <button id="download-xml" class="button" type="button" disabled>Scarica XML</button>
+        </div>
+
+        <div id="payment-messages" class="messages" role="status" aria-live="polite"></div>
+
+        <div id="payments-table" class="table-scroll hidden">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Pag.</th>
+                <th scope="col">Beneficiario</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">IBAN</th>
+                <th scope="col">Avviso</th>
+                <th scope="col" class="numeric">Importo</th>
+                <th scope="col">Causale</th>
+              </tr>
+            </thead>
+            <tbody id="payment-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Address book editor ---------------------------------------------- -->
+    <dialog id="address-book-dialog" class="dialog">
+      <form method="dialog" class="dialog-body">
+        <h2>Rubrica IBAN</h2>
+        <p class="hint">
+          Completa gli IBAN dei beneficiari estratti. I dati restano in questo browser solo se
+          scegli di salvarli, e non vengono inviati a nessun server.
+        </p>
+        <p id="address-book-status" class="hint"></p>
+
+        <div class="table-scroll dialog-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Codice Fiscale</th>
+                <th scope="col">Beneficiario</th>
+                <th scope="col">IBAN</th>
+                <th scope="col">Email avviso</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Stato</th>
+              </tr>
+            </thead>
+            <tbody id="address-book-rows"></tbody>
+          </table>
+        </div>
+
+        <div class="actions dialog-actions">
+          <button id="seed-address-book" class="button" type="button">Popola dai cedolini</button>
+          <button id="save-address-book" class="button" type="button">Salva nel browser</button>
+          <button id="export-address-book" class="button" type="button">Scarica CSV</button>
+          <button id="forget-address-book" class="button" type="button">Cancella salvati</button>
+          <button id="close-address-book" class="button primary" value="close">Chiudi</button>
+        </div>
+      </form>
+    </dialog>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          SlipCut Local · elaborazione locale nel browser, nessun upload dei cedolini o degli IBAN,
+          0 cookie, 0 tracciamento.
+        </p>
+        <p class="muted">
+          Distribuito secondo la GNU Affero General Public License v3.0 o successive.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
