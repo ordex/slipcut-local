@@ -1,0 +1,20 @@
+{
+  "name": "slipcut-rescript-spike",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "esmodule",
+      "in-source": true
+    }
+  ],
+  "suffix": ".res.mjs",
+  "gentypeconfig": {
+    "moduleResolution": "bundler",
+    "generatedFileExtension": ".gen.ts"
+  }
+}

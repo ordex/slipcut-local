@@ -1,0 +1,7 @@
+node_modules/
+*.res.mjs
+*.gen.ts
+sample.pdf
+lib/
+.bsb.lock
+package-lock.json

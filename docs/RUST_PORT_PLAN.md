@@ -3,6 +3,10 @@
 > Documento di pianificazione. Nessuna riga di codice applicativo è stata modificata:
 > l'unico codice aggiunto è lo spike di verifica in [`docs/rust-port-spike/`](./rust-port-spike/),
 > che serve a dimostrare — non ad assumere — che lo stack di dipendenze scelto funziona.
+>
+> **Alternativa senza WASM:** [`NON_WASM_ALTERNATIVE.md`](./NON_WASM_ALTERNATIVE.md) valuta
+> ReScript, che mantiene `pdfjs-dist`/`pdf-lib`/`jszip` e quindi annulla la maggior parte dei
+> rischi e delle trappole di parità elencati qui (§6.1, §6.2, §6.3, §7.1-§7.4).
 
 ---
 

@@ -1,0 +1,17 @@
+{
+  "name": "slipcut-rescript-spike",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "rescript build",
+    "test": "rescript build && node src/Test.res.mjs && node src/InteropTest.res.mjs"
+  },
+  "devDependencies": {
+    "rescript": "^12.3.0"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "pdf-lib": "^1.17.1"
+  }
+}
