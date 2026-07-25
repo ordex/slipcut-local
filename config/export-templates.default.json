@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "templates": [
+    {
+      "id": "generic-bulk-transfer",
+      "label": "CSV generico (7 colonne)",
+      "description": "Tracciato a 7 colonne accettato da diverse piattaforme di bonifici multipli.",
+      "columns": [
+        { "header": "Name", "source": "beneficiaryName" },
+        { "header": "Recipient type", "source": "recipientType" },
+        { "header": "IBAN", "source": "iban" },
+        { "header": "Recipient bank country", "source": "recipientBankCountry" },
+        { "header": "Currency", "fixed": "EUR" },
+        { "header": "Amount", "source": "amount", "format": "decimal-dot" },
+        { "header": "Payment reference", "source": "remittanceInformation" }
+      ]
+    },
+    {
+      "id": "bonifici-multipli-italiano",
+      "label": "Bonifici multipli (tracciato italiano)",
+      "description": "Cinque colonne con importo a virgola decimale, come richiesto da diversi portali italiani.",
+      "columns": [
+        { "header": "Nome Beneficiario", "source": "beneficiaryName" },
+        { "header": "IBAN", "source": "iban" },
+        { "header": "Partita IVA o Codice Fiscale (Opzionale)", "source": "codiceFiscale" },
+        { "header": "Importo", "source": "amount", "format": "decimal-comma" },
+        { "header": "Causale", "source": "remittanceInformation" }
+      ]
+    },
+    {
+      "id": "esempio-colonna-fissa",
+      "label": "Esempio con colonna fissa e avviso email",
+      "description": "Mostra una colonna con valore costante e l'indirizzo per l'avviso di pagamento.",
+      "columns": [
+        { "header": "Beneficiary", "source": "beneficiaryName" },
+        { "header": "IBAN", "source": "iban" },
+        { "header": "Amount", "source": "amount", "format": "decimal-dot" },
+        { "header": "Currency", "fixed": "EUR" },
+        { "header": "Salary", "fixed": "TRUE" },
+        { "header": "Notify", "source": "email" },
+        { "header": "Reference", "source": "remittanceInformation" }
+      ]
+    }
+  ]
+}
