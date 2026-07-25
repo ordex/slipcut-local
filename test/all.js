@@ -9,6 +9,7 @@ import './employee-name.test.js';
 import './harness.test.js';
 import './text-geometry.test.js';
 import './zip.test.js';
+import './iban-mapping.test.js';
 import './iban.test.js';
 import './money.test.js';
 import './net-amount.test.js';
