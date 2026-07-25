@@ -112,18 +112,18 @@ test('isExactAmount accepts only a full amount', () => {
 });
 
 test('an amount printed with its currency is still an amount', () => {
-  // The payable net on a real payslip arrives as "31.262,00 €".
-  assert.equal(isExactAmount('31.262,00 €'), true);
+  // The payable net on a real payslip arrives as "2.845,00 €".
+  assert.equal(isExactAmount('2.845,00 €'), true);
   assert.equal(isExactAmount('€ 1.234,56'), true);
   assert.equal(isExactAmount('1.234,56 EUR'), true);
-  assert.equal(parseItalianAmount('31.262,00 €'), 3126200);
+  assert.equal(parseItalianAmount('2.845,00 €'), 284500);
   assert.equal(parseItalianAmount('1.234,56 EUR'), 123456);
 });
 
 test('an ungrouped amount is still a printed amount', () => {
   // Not every payroll prints the thousands separator.
   assert.equal(isExactAmount('2056,00'), true);
-  assert.equal(isExactAmount('31262,00'), true);
+  assert.equal(isExactAmount('2845,00'), true);
   assert.equal(parseItalianAmount('2056,00'), 205600);
 });
 
@@ -138,7 +138,7 @@ test('isExactAmount rejects what is not one printed amount', () => {
 });
 
 test('everything isExactAmount accepts, the parser also parses', () => {
-  const accepted = ['31.262,00 €', '€ 1.234,56', '1.234,56', '2056,00', '-2.056,00', '1.234,56 EUR'];
+  const accepted = ['2.845,00 €', '€ 1.234,56', '1.234,56', '2056,00', '-2.056,00', '1.234,56 EUR'];
   for (const sample of accepted) {
     assert.equal(isExactAmount(sample), true, `should be accepted: ${sample}`);
     assert.ok(parseItalianAmount(sample) !== null, `should parse: ${sample}`);

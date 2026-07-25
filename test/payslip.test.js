@@ -33,7 +33,7 @@ test('detectLayout recognises the two payslip kinds', () => {
   assert.equal(detectLayout('1352 COMPENSO LORDO'), 'collaborator');
   // How a real payslip names a contract of continuous collaboration.
   assert.equal(detectLayout('Co.Co.Co'), 'collaborator');
-  assert.equal(detectLayout('000054 Compenso Co.Co.Co. 38.700,00'), 'collaborator');
+  assert.equal(detectLayout('000054 Compenso Co.Co.Co. 4.000,00'), 'collaborator');
   assert.equal(detectLayout('COD. FISC. RSSMRA80A01H501U RETRIBUZIONE ORDINARIA'), 'employee');
   assert.equal(detectLayout('QUALIFICA IMPIEGATO'), 'employee');
   assert.equal(detectLayout('una pagina qualunque'), 'unknown');
@@ -154,5 +154,5 @@ test('only a geometric amount reaches full confidence', () => {
 
 test('findGrossAmount reads the total on a real payslip row', () => {
   // The row reconstructs as label plus figure once the cells group correctly.
-  assert.equal(findGrossAmount('RATEI TOTALE COMPETENZE 38.700,00'), 3870000);
+  assert.equal(findGrossAmount('RATEI TOTALE COMPETENZE 4.000,00'), 400000);
 });

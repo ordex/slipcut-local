@@ -38,9 +38,12 @@ Two details are worth knowing, because they are where the value is:
 **The net amount is found geometrically.** A payslip prints gross, taxable,
 withholdings, roundings and year-to-date totals — and the order text appears in a
 PDF has nothing to do with where it sits on the page. So the app locates the
-`NETTO` label and takes the amount in the same visual box beside it. When that
-does not resolve it falls back to reading the text, and says so in the table and
-in the summary, because a fallback amount is the one most likely to be wrong.
+`NETTO` label and takes the amount that belongs to it: beside it on the same
+baseline, or below it when the label is a heading over its figure. Never above,
+because the line above a `NETTO DEL MESE` heading is the withholdings total.
+When the geometry does not resolve, the app falls back to reading the text and
+says so in the table and in the summary, since a fallback amount is the one most
+likely to be wrong.
 
 **The name is verified, not guessed.** Every stretch of text that could be a name
 is a candidate, and a candidate is accepted only if the six-character name code
@@ -173,9 +176,10 @@ on every release**, or visitors keep the version they already have.
 ## Known limits
 
 - 10 MB and 250 pages per document. Beyond that the run is truncated, and says so.
-- Payslip layouts vary by payroll vendor. The rules here assume the payable amount
-  is labelled `NETTO` and printed beside its label; check the extraction table
-  against your own files before trusting a run.
+- Payslip layouts vary by payroll vendor. The rules assume the payable amount is
+  labelled with the word `NETTO` and printed either beside that label or directly
+  under it. They have been checked against a Zucchetti payslip and the fixtures in
+  `test/`; check the extraction table against your own files before trusting a run.
 - A password-protected PDF is reported rather than read.
 - A scanned payslip has no text to extract, so nothing is found. There is no OCR.
 

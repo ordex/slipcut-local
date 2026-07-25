@@ -27,7 +27,7 @@ const AMOUNT_IN_TEXT = /-?\d{1,3}(?:\.\d{3})+,\d{2}|-?\d+,\d{2}/g;
  * Reduce a printed amount to its digits, separators and sign.
  *
  * Payroll prints the payable amount with its currency: the net on a real payslip
- * arrives as `31.262,00 €`. Both the parser and the shape test below go through
+ * arrives as `2.845,00 €`. Both the parser and the shape test below go through
  * here, so they cannot disagree about what counts as an amount — an earlier
  * version had the parser accepting the euro sign while the test rejected it, and
  * the consequence was that the one amount that mattered was never a candidate.
@@ -168,7 +168,7 @@ export function findAmountsInText(text) {
 
 /**
  * The shape of a printed monetary amount: exactly two decimals, thousands either
- * grouped correctly or not grouped at all. `2056,00` and `31.262,00` both count;
+ * grouped correctly or not grouped at all. `2056,00` and `2.845,00` both count;
  * `1.23,45` does not.
  */
 const PRINTED_AMOUNT = /^-?(?:\d{1,3}(?:\.\d{3})+|\d+),\d{2}$/;

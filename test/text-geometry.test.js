@@ -115,8 +115,8 @@ test('textAround respects the horizontal window', () => {
 test('cells of one table row stay on one line', () => {
   // Real coordinates: the row label, the column label and the figure are typeset
   // three points apart, and belong together.
-  const row = [item('RATEI', 54, 132, 14), item('TOTALE COMPETENZE', 424, 131, 52), item('38.700,00', 535, 129, 33)];
-  assert.deepEqual(toLines(row), ['RATEI TOTALE COMPETENZE 38.700,00']);
+  const row = [item('RATEI', 54, 132, 14), item('TOTALE COMPETENZE', 424, 131, 52), item('4.000,00', 535, 129, 33)];
+  assert.deepEqual(toLines(row), ['RATEI TOTALE COMPETENZE 4.000,00']);
 });
 
 test('rows seven points apart stay apart', () => {

@@ -55,10 +55,10 @@ const NOT_A_NET_LABEL = /NON\s*ARROT|ARROT\.?\s*PREC|RITENUT|CONGUAGLI|PROGRESSI
  * What an amount may never be is meaningfully *above* its label. Allowing that
  * is how a payslip whose layout reads
  *
- *     TOTALE TRATTENUTE   7.438,73
+ *     TOTALE TRATTENUTE   1.155,00
  *     ARROTONDAMENTO          0,73
  *     NETTO DEL MESE
- *          31.262,00 €
+ *          2.845,00 €
  *
  * gets read as paying out the withholdings.
  */

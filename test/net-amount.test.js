@@ -142,24 +142,24 @@ test('geometry wins over the text fallback when both could answer', () => {
 const HEADING_ABOVE_VALUE = [
   item('TOTALE', 424, 131, 19),
   item('COMPETENZE', 443, 131, 33),
-  item('38.700,00', 535, 129, 33),
+  item('4.000,00', 535, 129, 33),
   item('TOTALE', 424, 119, 19),
   item('TRATTENUTE', 444, 119, 31),
-  item('7.438,73', 540, 117, 29),
+  item('1.155,00', 540, 117, 29),
   item('ARROTONDAMENTO', 425, 108, 49),
   item('0,73', 554, 106, 14),
   item('NETTO DEL MESE', 484, 101, 44),
-  item('31.262,00 €', 499, 89, 56),
+  item('2.845,00 €', 499, 89, 56),
 ];
 
 test('the value under a heading is the one taken', () => {
-  assert.equal(findNetAmountByGeometry(HEADING_ABOVE_VALUE), 3126200);
+  assert.equal(findNetAmountByGeometry(HEADING_ABOVE_VALUE), 284500);
 });
 
 test('the withholdings total above the label is not the net', () => {
   const found = findNetAmountByGeometry(HEADING_ABOVE_VALUE);
-  assert.ok(found !== 743873, 'took TOTALE TRATTENUTE');
-  assert.ok(found !== 3870000, 'took TOTALE COMPETENZE');
+  assert.ok(found !== 115500, 'took TOTALE TRATTENUTE');
+  assert.ok(found !== 400000, 'took TOTALE COMPETENZE');
 });
 
 test('an amount above its label is never that label’s value', () => {
@@ -168,18 +168,18 @@ test('an amount above its label is never that label’s value', () => {
 });
 
 test('a value below the label may be indented or centred under it', () => {
-  const centred = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 499, 89, 48)];
-  const indented = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 460, 89, 48)];
-  assert.equal(findNetAmountByGeometry(centred), 3126200);
-  assert.equal(findNetAmountByGeometry(indented), 3126200);
+  const centred = [item('NETTO DEL MESE', 484, 101, 44), item('2.845,00', 499, 89, 48)];
+  const indented = [item('NETTO DEL MESE', 484, 101, 44), item('2.845,00', 460, 89, 48)];
+  assert.equal(findNetAmountByGeometry(centred), 284500);
+  assert.equal(findNetAmountByGeometry(indented), 284500);
 });
 
 test('a value in a neighbouring column is not taken', () => {
-  const page = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 60, 89, 48)];
+  const page = [item('NETTO DEL MESE', 484, 101, 44), item('2.845,00', 60, 89, 48)];
   assert.equal(findNetAmountByGeometry(page), null);
 });
 
 test('a value too far below the label is not taken', () => {
-  const page = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 499, 20, 48)];
+  const page = [item('NETTO DEL MESE', 484, 101, 44), item('2.845,00', 499, 20, 48)];
   assert.equal(findNetAmountByGeometry(page), null);
 });
