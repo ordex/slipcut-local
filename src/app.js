@@ -11,6 +11,7 @@ import { formatExtractionSummaryCsv } from './core/summary-csv.js';
 import { setPages as setAddressBookPages } from './ui/address-book-step.js';
 import { byId, setStatus, setVisible } from './ui/dom.js';
 import { downloadBlob, downloadText } from './ui/download.js';
+import { setPages as setExportPages } from './ui/exports-step.js';
 import { extractionSummary, renderExtractionTable } from './ui/views/extraction-table.js';
 
 /** @typedef {import('./core/payslip.js').PayslipPage} PayslipPage */
@@ -165,6 +166,7 @@ async function processFile(file) {
     setStatus(elements.fileStatus, `${file.name} elaborato.`, 'ok');
 
     setAddressBookPages(result.pages);
+    setExportPages(result.pages);
     setVisible(elements.paymentSection, true);
   } catch (error) {
     setStatus(
