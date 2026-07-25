@@ -1,0 +1,25 @@
+[package]
+name = "slipcut-port-spike"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "wasmbind"] }
+csv = "1"
+euclid = "0.20"
+# Pinned to the version pdf-extract itself uses, so a single lopdf::Document
+# can be shared between text extraction and page splitting.
+lopdf = { version = "0.42", default-features = false, features = ["wasm_js"] }
+pdf-extract = "0.12"
+quick-xml = "0.41"
+regex = "1"
+serde_json = "1"
+unicode-normalization = "0.1"
+url = "2"
+zip = { version = "8.6", default-features = false, features = ["deflate"] }
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
