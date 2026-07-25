@@ -7,6 +7,7 @@ import './codice-fiscale.test.js';
 import './csv.test.js';
 import './employee-name.test.js';
 import './export-templates.test.js';
+import './extraction-summary.test.js';
 import './harness.test.js';
 import './storage.test.js';
 import './summary-csv.test.js';

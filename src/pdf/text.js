@@ -36,13 +36,14 @@ export const pdfjsVersion = pdfjs.version;
  * @returns {Promise<PdfPages>}
  */
 export async function openPdf(bytes) {
-  const document = await pdfjs.getDocument({
+  const task = pdfjs.getDocument({
     data: bytes,
     // Nothing about a payslip should reach the network, and an XFA form is not
     // something this app can read anyway.
     isEvalSupported: false,
     enableXfa: false,
-  }).promise;
+  });
+  const document = await task.promise;
 
   return {
     pageCount: document.numPages,
@@ -60,7 +61,8 @@ export async function openPdf(bytes) {
     },
 
     async close() {
-      await document.destroy();
+      // Releasing goes through the loading task, not the document.
+      await task.destroy();
     },
   };
 }
