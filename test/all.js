@@ -18,6 +18,7 @@ import './money.test.js';
 import './net-amount.test.js';
 import './payment-rows.test.js';
 import './pdf-items.test.js';
+import './pdf-split.test.js';
 import './payment-xml.test.js';
 import './payslip.test.js';
 import './period.test.js';
