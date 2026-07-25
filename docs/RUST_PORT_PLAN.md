@@ -4,7 +4,9 @@
 > l'unico codice aggiunto è lo spike di verifica in [`docs/rust-port-spike/`](./rust-port-spike/),
 > che serve a dimostrare — non ad assumere — che lo stack di dipendenze scelto funziona.
 >
-> **Alternativa senza WASM:** [`NON_WASM_ALTERNATIVE.md`](./NON_WASM_ALTERNATIVE.md) valuta
+> **Altre strade:** [`NO_BUILD_STEP.md`](./NO_BUILD_STEP.md) valuta JS puro senza Node/npm
+> (nessun build step) — la più economica e senza rischi sull'estrazione.
+> [`NON_WASM_ALTERNATIVE.md`](./NON_WASM_ALTERNATIVE.md) valuta
 > ReScript, che mantiene `pdfjs-dist`/`pdf-lib`/`jszip` e quindi annulla la maggior parte dei
 > rischi e delle trappole di parità elencati qui (§6.1, §6.2, §6.3, §7.1-§7.4).
 

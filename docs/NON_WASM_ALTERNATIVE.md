@@ -1,7 +1,8 @@
 # Alternative senza WASM — ReScript (raccomandato), e Python
 
-> Companion di [`RUST_PORT_PLAN.md`](./RUST_PORT_PLAN.md). Verifiche riproducibili in
-> [`docs/rescript-spike/`](./rescript-spike/). Nessun codice applicativo modificato.
+> Companion di [`RUST_PORT_PLAN.md`](./RUST_PORT_PLAN.md) e di
+> [`NO_BUILD_STEP.md`](./NO_BUILD_STEP.md) (JS puro senza Node/npm). Verifiche riproducibili
+> in [`docs/rescript-spike/`](./rescript-spike/). Nessun codice applicativo modificato.
 
 ---
 
