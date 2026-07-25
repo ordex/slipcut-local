@@ -4,4 +4,5 @@
  * Keep the list alphabetical.
  */
 import './harness.test.js';
+import './iban.test.js';
 import './money.test.js';
