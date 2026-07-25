@@ -31,6 +31,26 @@ function finiteNumber(value, fallback) {
   return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+/** C0 and C1 control characters, plus the non-breaking space. */
+const NOT_REALLY_TEXT = /[\u0000-\u001f\u007f-\u009f\u00a0]/g;
+
+/**
+ * Make a fragment's text mean what it looks like.
+ *
+ * Some payroll software does not encode spaces as spaces: one Italian vendor
+ * emits U+0003 between words, so the boundary in `Aprile 2026` is not a space
+ * at all, and every rule that looks for one quietly fails to match. A
+ * non-breaking space causes the same trouble more subtly.
+ *
+ * Normalising here means the rules downstream can assume text behaves.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function normaliseFragmentText(text) {
+  return text.replace(NOT_REALLY_TEXT, ' ').replace(/\s+/g, ' ').trim();
+}
+
 /**
  * Convert fragments, dropping the blank ones.
  *
@@ -47,7 +67,7 @@ export function toPositionedItems(items) {
   for (const raw of items ?? []) {
     if (raw === null || typeof raw !== 'object') continue;
     const item = /** @type {PdfTextItem} */ (raw);
-    const text = String(item.str ?? '').trim();
+    const text = normaliseFragmentText(String(item.str ?? ''));
     if (text.length === 0) continue;
     const transform = Array.isArray(item.transform) ? item.transform : [];
     positioned.push({

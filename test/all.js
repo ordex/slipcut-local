@@ -21,6 +21,7 @@ import './iban.test.js';
 import './money.test.js';
 import './net-amount.test.js';
 import './payment-rows.test.js';
+import './pdf-items-control.test.js';
 import './pdf-items.test.js';
 import './pdf-split.test.js';
 import './payment-xml.test.js';
