@@ -4,6 +4,7 @@
  * Keep the list alphabetical.
  */
 import './codice-fiscale.test.js';
+import './csv.test.js';
 import './employee-name.test.js';
 import './harness.test.js';
 import './text-geometry.test.js';
