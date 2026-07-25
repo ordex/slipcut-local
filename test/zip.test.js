@@ -68,7 +68,7 @@ async function readEntry(archive, entry) {
   const start = entry.localOffset + 30 + nameLength + extraLength;
   const body = archive.subarray(start, start + entry.compressedSize);
   if (entry.method === 0) return new TextDecoder().decode(body);
-  const stream = new Blob([body]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const stream = new Blob([/** @type {BlobPart} */ (body)]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
   return new Response(stream).text();
 }
 

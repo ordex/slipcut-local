@@ -89,16 +89,25 @@ test('textAround reads the neighbours of a fragment', () => {
   assert.equal(textAround(split, split[0], 85), 'NETTO CORRISPOSTO');
 });
 
+/**
+ * @param {import('../src/core/text-geometry.js').PositionedItem[]} items
+ * @param {string} text
+ * @returns {import('../src/core/text-geometry.js').PositionedItem}
+ */
+function itemNamed(items, text) {
+  const found = items.find((entry) => entry.text === text);
+  if (found === undefined) throw new Error(`fixture has no item ${text}`);
+  return found;
+}
+
 test('textAround stays on the anchor baseline', () => {
   const withOther = [...PAGE, item('ALTRO', 385, 140, 30)];
-  const netto = withOther.find((entry) => entry.text === 'NETTO');
-  assert.ok(netto);
+  const netto = itemNamed(withOther, 'NETTO');
   assert.equal(textAround(withOther, netto, 100).includes('ALTRO'), false);
 });
 
 test('textAround respects the horizontal window', () => {
-  const netto = PAGE.find((entry) => entry.text === 'NETTO');
-  assert.ok(netto);
+  const netto = itemNamed(PAGE, 'NETTO');
   assert.equal(textAround(PAGE, netto, 100).includes('2.056,00'), true);
   assert.equal(textAround(PAGE, netto, 10).includes('2.056,00'), false);
 });

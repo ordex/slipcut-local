@@ -69,7 +69,9 @@ export function crc32(bytes) {
  * @returns {Promise<Uint8Array>} raw deflate stream, no zlib wrapper
  */
 async function deflateRaw(bytes) {
-  const compressed = new Blob([bytes])
+  // Cast: `BlobPart` excludes views over a SharedArrayBuffer, which these never
+  // are, and the type system cannot see that.
+  const compressed = new Blob([/** @type {BlobPart} */ (bytes)])
     .stream()
     .pipeThrough(new CompressionStream('deflate-raw'));
   return new Uint8Array(await new Response(compressed).arrayBuffer());
@@ -101,7 +103,7 @@ function toDosDateTime(date) {
 export class ZipWriter {
   /** @type {Entry[]} */
   #entries = [];
-  /** @type {Uint8Array[]} */
+  /** @type {BlobPart[]} */
   #parts = [];
   #offset = 0;
 
@@ -159,7 +161,7 @@ export class ZipWriter {
       offset: this.#offset,
     });
 
-    this.#parts.push(new Uint8Array(header.buffer), encodedName, body);
+    this.#parts.push(new Uint8Array(header.buffer), encodedName, /** @type {BlobPart} */ (body));
     this.#offset += LOCAL_HEADER_SIZE + encodedName.length + body.length;
   }
 
@@ -173,7 +175,7 @@ export class ZipWriter {
    * @returns {Blob}
    */
   finish() {
-    /** @type {Uint8Array[]} */
+    /** @type {BlobPart[]} */
     const directory = [];
     let directorySize = 0;
 
@@ -197,7 +199,7 @@ export class ZipWriter {
       header.setUint32(38, 0, true); // external attributes
       header.setUint32(42, entry.offset, true);
 
-      directory.push(new Uint8Array(header.buffer), entry.name);
+      directory.push(new Uint8Array(header.buffer), /** @type {BlobPart} */ (entry.name));
       directorySize += CENTRAL_HEADER_SIZE + entry.name.length;
     }
 

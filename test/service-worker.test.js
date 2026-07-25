@@ -13,10 +13,10 @@ import { listRepoFiles, readRepoFile } from './read-file.js';
 async function readServiceWorker() {
   const source = await readRepoFile('sw.js');
   const listMatch = source.match(/const PRECACHE = \[([\s\S]*?)\];/);
-  assert.ok(listMatch, 'PRECACHE array not found in sw.js');
+  if (listMatch === null) throw new Error('PRECACHE array not found in sw.js');
   const precache = [...listMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
   const nameMatch = source.match(/const CACHE_NAME = '([^']+)'/);
-  assert.ok(nameMatch, 'CACHE_NAME not found in sw.js');
+  if (nameMatch === null) throw new Error('CACHE_NAME not found in sw.js');
   return { source, precache, cacheName: nameMatch[1] };
 }
 
