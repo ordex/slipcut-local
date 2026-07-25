@@ -55,8 +55,12 @@ function capitalise(monthName) {
  * Read the pay period from a page of extracted text.
  *
  * A spelled-out month wins, because that is the period heading payroll prints.
- * Failing that, the *last* printed date is used: the dates on a payslip run
- * from hiring date to period end, and the period end is what we want.
+ *
+ * Failing that, the *latest* printed date is used, not the last one on the page.
+ * A payslip's dates run from the hiring date to the period end, so the latest is
+ * the one wanted — and reading order is no guide at all, because the last thing
+ * printed is often a footer: one Italian payroll vendor ends every page with its
+ * own INAIL authorisation, dated 2009, which read as a period seventeen years off.
  *
  * @param {string} text
  * @returns {Period | null}
@@ -73,13 +77,15 @@ export function findPeriod(text) {
     return period(year, MONTHS[monthName], `${capitalise(monthName)} ${year}`);
   }
 
-  const dates = [...normalised.matchAll(PRINTED_DATE)];
+  const dates = [...normalised.matchAll(PRINTED_DATE)]
+    .map(([, day, month, year]) => ({ day, month, year }))
+    .filter((date) => Number(date.month) >= 1 && Number(date.month) <= 12)
+    .sort((a, b) => `${a.year}${a.month}${a.day}`.localeCompare(`${b.year}${b.month}${b.day}`));
+
+  // One date on its own is as likely to be a hiring date as a period.
   if (dates.length >= 2) {
-    const last = dates[dates.length - 1];
-    const [, , month, year] = last;
-    if (Number(month) >= 1 && Number(month) <= 12) {
-      return period(year, month, `${month}/${year}`);
-    }
+    const latest = dates[dates.length - 1];
+    return period(latest.year, latest.month, `${latest.month}/${latest.year}`);
   }
 
   return null;

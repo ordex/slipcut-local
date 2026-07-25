@@ -29,7 +29,7 @@ test('findPeriod prefers the month name over printed dates', () => {
   assert.equal(findPeriod(text)?.yyyymm, '202606');
 });
 
-test('findPeriod falls back to the last printed date', () => {
+test('findPeriod falls back to the latest printed date', () => {
   const text = 'Assunto il 01/03/2020 al 30/06/2026';
   assert.deepEqual(findPeriod(text), {
     year: '2026',
@@ -61,4 +61,36 @@ test('findPeriod returns null when there is no period', () => {
 test('findPeriod does not read a year out of range', () => {
   assert.equal(findPeriod('GIUGNO 1899'), null);
   assert.equal(findPeriod('GIUGNO 2126'), null);
+});
+
+test('a footer date does not become the period', () => {
+  // A real payslip ends with the payroll vendor's own INAIL authorisation,
+  // dated 2009, which is the last date on the page but not the period.
+  const text = [
+    'Periodo 01/01/2026 - 30/04/2026',
+    'Competenze 01/01/2026 - 30/04/2026',
+    'Zucchetti spa, Autorizzazione Inail n. 299 del 15/01/2009',
+  ].join('\n');
+  assert.equal(findPeriod(text)?.yyyymm, '202604');
+});
+
+test('the period heading wins over every date, footer included', () => {
+  const text = [
+    'PERIODO DI RETRIBUZIONE Aprile 2026',
+    'Assunto il 12/03/2019',
+    'Autorizzazione Inail n. 299 del 15/01/2009',
+  ].join('\n');
+  assert.equal(findPeriod(text)?.yyyymm, '202604');
+  assert.equal(findPeriod(text)?.label, 'Aprile 2026');
+});
+
+test('the latest date wins regardless of reading order', () => {
+  assert.equal(findPeriod('30/04/2026 e poi 01/01/2026')?.yyyymm, '202604');
+  assert.equal(findPeriod('01/01/2026 e poi 30/04/2026')?.yyyymm, '202604');
+});
+
+test('dates written with dashes are left alone', () => {
+  // The print timestamp at the top of a real payslip is 04-05-2026, a month after
+  // the period; reading it would move every payment into the wrong month.
+  assert.equal(findPeriod('Stampato il 04-05-2026 16:21 periodo 01/01/2026 - 30/04/2026')?.yyyymm, '202604');
 });
