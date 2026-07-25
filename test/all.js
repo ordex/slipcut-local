@@ -10,6 +10,7 @@ import './export-templates.test.js';
 import './harness.test.js';
 import './summary-csv.test.js';
 import './text-geometry.test.js';
+import './xml.test.js';
 import './zip.test.js';
 import './iban-mapping.test.js';
 import './iban.test.js';
