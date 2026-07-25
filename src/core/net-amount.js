@@ -42,14 +42,38 @@ const NET_LABEL = /\bNETTO\b/;
  */
 const NOT_A_NET_LABEL = /NON\s*ARROT|ARROT\.?\s*PREC|RITENUT|CONGUAGLI|PROGRESSIV|IMPONIBIL/;
 
-/** How far right of the label its amount may sit. */
+/**
+ * Two layouts put an amount with its label, and only two.
+ *
+ * *Beside*: the amount is on the label's baseline, to its right — `NETTO
+ * 2.056,00`.
+ *
+ * *Below*: the label is a heading and the value sits under it, roughly in its
+ * column. Real payslips do this with a shaded `NETTO DEL MESE` bar above the
+ * figure.
+ *
+ * What an amount may never be is meaningfully *above* its label. Allowing that
+ * is how a payslip whose layout reads
+ *
+ *     TOTALE TRATTENUTE   7.438,73
+ *     ARROTONDAMENTO          0,73
+ *     NETTO DEL MESE
+ *          31.262,00 €
+ *
+ * gets read as paying out the withholdings.
+ */
+
+/** Baselines within this are the same line; beyond it the amount is above or below. */
+const BESIDE_DY = 4;
+/** Beside: how far right of the label's end the amount may start. */
 const DX_MIN = -4;
 const DX_MAX = 220;
-/** Where the amount usually sits, used to score rather than to exclude. */
+/** Beside: where the amount usually starts, used to score rather than to exclude. */
 const DX_TYPICAL = 45;
-/** Same baseline, or slightly below it inside the same box. */
-const DY_MAX = 26;
+/** Below: how far under the label the value may sit. */
 const BELOW_MAX = 58;
+/** Below: how far the value may be offset from the label's column. */
+const COLUMN_SLACK = 60;
 
 /**
  * Is this fragment a label for the payable amount?
@@ -109,7 +133,38 @@ function amountCandidates(items) {
 }
 
 /**
- * Locate the amount in the same visual box as a `NETTO` label.
+ * How well an amount's position fits one of the two layouts, or null when it fits
+ * neither and is therefore not this label's value.
+ *
+ * @param {PositionedItem} label
+ * @param {PositionedItem} amount
+ * @returns {number | null} higher is a better fit
+ */
+function positionScore(label, amount) {
+  const labelEnd = label.x + Math.max(label.width, 0);
+  const below = label.y - amount.y;
+
+  if (Math.abs(below) <= BESIDE_DY) {
+    const dx = amount.x - labelEnd;
+    if (dx < DX_MIN || dx > DX_MAX) return null;
+    return Math.max(0, 90 - Math.abs(dx - DX_TYPICAL)) + 80;
+  }
+
+  if (below > BESIDE_DY && below <= BELOW_MAX) {
+    // In the label's column: the value may be centred, indented or right-aligned
+    // under it, but it does not wander off into a neighbouring box.
+    const startsBeforeColumn = amount.x + amount.width < label.x - COLUMN_SLACK;
+    const startsAfterColumn = amount.x > labelEnd + DX_MAX;
+    if (startsBeforeColumn || startsAfterColumn) return null;
+    return Math.max(0, 80 - below) + Math.max(0, 60 - Math.abs(amount.x - label.x) / 2);
+  }
+
+  // Above the label, or too far below it.
+  return null;
+}
+
+/**
+ * Locate the amount belonging to a `NETTO` label.
  * @param {PositionedItem[]} items
  * @returns {Cents | null}
  */
@@ -129,22 +184,16 @@ export function findNetAmountByGeometry(items) {
     // A label reading exactly "NETTO" is a stronger signal than one where the
     // word only appears among other text.
     const exactLabelBonus = NET_LABEL.test(context) ? 100 : 0;
-    const paidOutBonus = /NETTO\s+CORRISPOSTO/.test(context) ? 40 : 0;
+    const paidOutBonus = /NETTO\s+(?:CORRISPOSTO|DEL\s+MESE)/.test(context) ? 40 : 0;
 
     for (const { item: amount, cents } of candidates) {
-      const dx = amount.x - (label.x + Math.max(label.width, 0));
-      const dy = Math.abs(amount.y - label.y);
-      const below = label.y - amount.y;
-
-      const toTheRight = dx >= DX_MIN && dx <= DX_MAX;
-      const sameBox = dy <= DY_MAX || (below >= 0 && below <= BELOW_MAX);
-      if (!toTheRight || !sameBox) continue;
+      const fit = positionScore(label, amount);
+      if (fit === null) continue;
 
       const score =
         exactLabelBonus +
         paidOutBonus +
-        Math.max(0, 90 - Math.abs(dx - DX_TYPICAL)) +
-        Math.max(0, 80 - dy * 2) +
+        fit +
         (cents >= TYPICAL_MIN && cents <= TYPICAL_MAX ? 25 : 0);
 
       if (best === null || score > best.score) best = { cents, score };

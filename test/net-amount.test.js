@@ -133,3 +133,53 @@ test('geometry wins over the text fallback when both could answer', () => {
   const text = 'NETTO 9.999,00';
   assert.deepEqual(findNetAmount({ items, text }), { cents: 205600, source: 'netto-box' });
 });
+
+/**
+ * The bottom-right block of a real payslip, at its real coordinates. The payable
+ * amount sits *under* a shaded NETTO DEL MESE heading, and the withholdings total
+ * sits above it — so an amount above a label must never be taken as its value.
+ */
+const HEADING_ABOVE_VALUE = [
+  item('TOTALE', 424, 131, 19),
+  item('COMPETENZE', 443, 131, 33),
+  item('38.700,00', 535, 129, 33),
+  item('TOTALE', 424, 119, 19),
+  item('TRATTENUTE', 444, 119, 31),
+  item('7.438,73', 540, 117, 29),
+  item('ARROTONDAMENTO', 425, 108, 49),
+  item('0,73', 554, 106, 14),
+  item('NETTO DEL MESE', 484, 101, 44),
+  item('31.262,00 €', 499, 89, 56),
+];
+
+test('the value under a heading is the one taken', () => {
+  assert.equal(findNetAmountByGeometry(HEADING_ABOVE_VALUE), 3126200);
+});
+
+test('the withholdings total above the label is not the net', () => {
+  const found = findNetAmountByGeometry(HEADING_ABOVE_VALUE);
+  assert.ok(found !== 743873, 'took TOTALE TRATTENUTE');
+  assert.ok(found !== 3870000, 'took TOTALE COMPETENZE');
+});
+
+test('an amount above its label is never that label’s value', () => {
+  const page = [item('NETTO', 380, 100, 34), item('9.999,00', 445, 118, 39)];
+  assert.equal(findNetAmountByGeometry(page), null);
+});
+
+test('a value below the label may be indented or centred under it', () => {
+  const centred = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 499, 89, 48)];
+  const indented = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 460, 89, 48)];
+  assert.equal(findNetAmountByGeometry(centred), 3126200);
+  assert.equal(findNetAmountByGeometry(indented), 3126200);
+});
+
+test('a value in a neighbouring column is not taken', () => {
+  const page = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 60, 89, 48)];
+  assert.equal(findNetAmountByGeometry(page), null);
+});
+
+test('a value too far below the label is not taken', () => {
+  const page = [item('NETTO DEL MESE', 484, 101, 44), item('31.262,00', 499, 20, 48)];
+  assert.equal(findNetAmountByGeometry(page), null);
+});
