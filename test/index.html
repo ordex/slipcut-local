@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SlipCut Local — tests</title>
+    <style>
+      body { font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 2rem; }
+      h1 { font-size: 1rem; font-weight: 600; }
+      #summary { font-weight: 600; padding: 0.5rem 0.75rem; border-radius: 4px; display: inline-block; }
+      #summary.pass { background: #e6f4ea; color: #12622c; }
+      #summary.fail { background: #fce8e6; color: #a50e0e; }
+      #summary.running { background: #eee; color: #444; }
+      ol { padding-left: 2.5rem; }
+      li.pass::marker { content: '✓ '; color: #12622c; }
+      li.fail::marker { content: '✗ '; color: #a50e0e; }
+      li.fail { color: #a50e0e; }
+      pre { margin: 0.25rem 0 0.75rem; color: #a50e0e; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>SlipCut Local — test suite</h1>
+    <p id="summary" class="running">running…</p>
+    <ol id="results"></ol>
+
+    <script type="module">
+      import { run } from './harness.js';
+      await import('./all.js');
+
+      const results = document.querySelector('#results');
+      const summaryEl = document.querySelector('#summary');
+
+      const summary = await run({
+        onResult(result) {
+          const item = document.createElement('li');
+          item.className = result.error === null ? 'pass' : 'fail';
+          item.textContent = result.name;
+          if (result.error !== null) {
+            const pre = document.createElement('pre');
+            pre.textContent = result.error.message;
+            item.appendChild(pre);
+          }
+          results.appendChild(item);
+        },
+      });
+
+      summaryEl.textContent = `${summary.passed}/${summary.total} passed`;
+      summaryEl.className = summary.failed === 0 ? 'pass' : 'fail';
+      // Read by automation.
+      window.testSummary = summary;
+    </script>
+  </body>
+</html>
