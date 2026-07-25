@@ -8,6 +8,7 @@
  */
 
 import { formatExtractionSummaryCsv } from './core/summary-csv.js';
+import { setPages as setAddressBookPages } from './ui/address-book-step.js';
 import { byId, setStatus, setVisible } from './ui/dom.js';
 import { downloadBlob, downloadText } from './ui/download.js';
 import { extractionSummary, renderExtractionTable } from './ui/views/extraction-table.js';
@@ -46,6 +47,7 @@ const elements = {
   extractionRows: byId('extraction-rows'),
   downloadArchive: /** @type {HTMLButtonElement} */ (byId('download-archive')),
   downloadSummary: /** @type {HTMLButtonElement} */ (byId('download-summary')),
+  paymentSection: byId('payment-section'),
 };
 
 /**
@@ -161,7 +163,9 @@ async function processFile(file) {
     elements.extractionSummary.textContent = extractionSummary(result);
     setVisible(elements.extractionSection, true);
     setStatus(elements.fileStatus, `${file.name} elaborato.`, 'ok');
-    onExtractionReady(result.pages);
+
+    setAddressBookPages(result.pages);
+    setVisible(elements.paymentSection, true);
   } catch (error) {
     setStatus(
       elements.fileStatus,
@@ -171,17 +175,6 @@ async function processFile(file) {
   } finally {
     hideProgress();
   }
-}
-
-/**
- * Extension point for the payment step, which is wired separately.
- * @type {(pages: PayslipPage[]) => void}
- */
-let onExtractionReady = () => {};
-
-/** @param {(pages: PayslipPage[]) => void} handler */
-export function whenExtractionReady(handler) {
-  onExtractionReady = handler;
 }
 
 /** @returns {PayslipPage[]} */

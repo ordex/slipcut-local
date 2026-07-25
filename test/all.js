@@ -3,6 +3,7 @@
  * Every test module, in one place. Both runners import this and nothing else.
  * Keep the list alphabetical.
  */
+import './address-book-view.test.js';
 import './codice-fiscale.test.js';
 import './csv.test.js';
 import './employee-name.test.js';
