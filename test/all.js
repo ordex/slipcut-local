@@ -7,3 +7,4 @@ import './codice-fiscale.test.js';
 import './harness.test.js';
 import './iban.test.js';
 import './money.test.js';
+import './person-name.test.js';
