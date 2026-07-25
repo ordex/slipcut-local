@@ -10,5 +10,6 @@ import './text-geometry.test.js';
 import './iban.test.js';
 import './money.test.js';
 import './net-amount.test.js';
+import './payslip.test.js';
 import './period.test.js';
 import './person-name.test.js';
