@@ -111,3 +111,20 @@ test('textAround respects the horizontal window', () => {
   assert.equal(textAround(PAGE, netto, 100).includes('2.056,00'), true);
   assert.equal(textAround(PAGE, netto, 10).includes('2.056,00'), false);
 });
+
+test('cells of one table row stay on one line', () => {
+  // Real coordinates: the row label, the column label and the figure are typeset
+  // three points apart, and belong together.
+  const row = [item('RATEI', 54, 132, 14), item('TOTALE COMPETENZE', 424, 131, 52), item('38.700,00', 535, 129, 33)];
+  assert.deepEqual(toLines(row), ['RATEI TOTALE COMPETENZE 38.700,00']);
+});
+
+test('rows seven points apart stay apart', () => {
+  // From the same payslip: the tolerance has to fit between 3 and 7.
+  const rows = [
+    item('ARROTONDAMENTO', 425, 108, 49),
+    item('0,73', 554, 106, 14),
+    item('NETTO DEL MESE', 484, 101, 44),
+  ];
+  assert.deepEqual(toLines(rows), ['ARROTONDAMENTO 0,73', 'NETTO DEL MESE']);
+});

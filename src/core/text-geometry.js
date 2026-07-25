@@ -22,8 +22,16 @@
  * @property {number} height font size
  */
 
-/** Baselines closer than this belong to the same visual line. */
-const LINE_TOLERANCE = 2.5;
+/**
+ * Baselines closer than this belong to the same visual line.
+ *
+ * Cells in one row of a payroll table are not typeset on exactly the same
+ * baseline: a real payslip prints `RATEI` at y=132, `TOTALE COMPETENZE` at 131
+ * and the figure at 129. Too small a tolerance splits that row and the label
+ * loses its value; too large a one merges rows, which on the same payslip are
+ * only 7 points apart. It has to sit between the two.
+ */
+const LINE_TOLERANCE = 4;
 
 /**
  * Group fragments into lines, top to bottom, each ordered left to right.
