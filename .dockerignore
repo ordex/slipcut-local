@@ -1,0 +1,5 @@
+.git
+docs
+test
+vendor
+*.fixture.pdf
