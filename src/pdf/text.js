@@ -5,7 +5,7 @@
  * The only module that knows pdf.js exists.
  */
 
-import * as pdfjs from '../../vendor/pdf.mjs';
+import * as pdfjs from '../../vendor/pdf.js';
 import { toPositionedItems } from './items.js';
 
 /** @typedef {import('../core/text-geometry.js').PositionedItem} PositionedItem */
@@ -15,7 +15,7 @@ import { toPositionedItems } from './items.js';
  * Resolved relative to this module, so the app keeps working when served from a
  * subdirectory.
  */
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('../../vendor/pdf.worker.mjs', import.meta.url).href;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('../../vendor/pdf.worker.js', import.meta.url).href;
 
 export const pdfjsVersion = pdfjs.version;
 

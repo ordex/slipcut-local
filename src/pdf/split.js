@@ -9,7 +9,7 @@
  * A page that cannot be filed is listed rather than dropped silently.
  */
 
-import { PDFDocument } from '../../vendor/pdf-lib.mjs';
+import { PDFDocument } from '../../vendor/pdf-lib.js';
 import { payslipFolder } from '../core/payslip.js';
 import { formatExtractionSummaryCsv } from '../core/summary-csv.js';
 import { ZipWriter } from '../zip.js';

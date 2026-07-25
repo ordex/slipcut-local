@@ -44,8 +44,8 @@ echo "pdfjs-dist $PDFJS_VERSION (Apache-2.0)"
 fetch "https://registry.npmjs.org/pdfjs-dist/-/pdfjs-dist-$PDFJS_VERSION.tgz" \
 	"$PDFJS_SHA256" "$work/pdfjs.tgz"
 tar xzf "$work/pdfjs.tgz" -C "$work"
-cp "$work/package/build/pdf.min.mjs" "$vendor/pdf.mjs"
-cp "$work/package/build/pdf.worker.min.mjs" "$vendor/pdf.worker.mjs"
+cp "$work/package/build/pdf.min.mjs" "$vendor/pdf.js"
+cp "$work/package/build/pdf.worker.min.mjs" "$vendor/pdf.worker.js"
 cp "$work/package/LICENSE" "$vendor/LICENSE.pdfjs-dist"
 rm -rf "$work/package"
 
@@ -57,7 +57,7 @@ echo "pdf-lib $PDFLIB_VERSION (MIT)"
 fetch "https://registry.npmjs.org/pdf-lib/-/pdf-lib-$PDFLIB_VERSION.tgz" \
 	"$PDFLIB_SHA256" "$work/pdf-lib.tgz"
 tar xzf "$work/pdf-lib.tgz" -C "$work"
-cp "$work/package/dist/pdf-lib.esm.min.js" "$vendor/pdf-lib.mjs"
+cp "$work/package/dist/pdf-lib.esm.min.js" "$vendor/pdf-lib.js"
 cp "$work/package/LICENSE.md" "$vendor/LICENSE.pdf-lib"
 
 cat >"$vendor/README.md" <<'NOTE'
@@ -67,10 +67,12 @@ Downloaded by `tools/fetch-vendor.sh`, not committed and not edited.
 
 | File | Upstream | Licence |
 | --- | --- | --- |
-| `pdf.mjs`, `pdf.worker.mjs` | pdfjs-dist | Apache-2.0, `LICENSE.pdfjs-dist` |
-| `pdf-lib.mjs` | pdf-lib | MIT, `LICENSE.pdf-lib` |
+| `pdf.js`, `pdf.worker.js` | pdfjs-dist | Apache-2.0, `LICENSE.pdfjs-dist` |
+| `pdf-lib.js` | pdf-lib | MIT, `LICENSE.pdf-lib` |
 
-Both are the upstream ES module builds, renamed and otherwise untouched.
+Both are the upstream ES module builds, renamed to `.js` and otherwise
+untouched: `.mjs` is missing from the default MIME map of more than one static
+host, and a module served as the wrong type is refused by the browser.
 NOTE
 
 echo

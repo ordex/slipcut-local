@@ -61,9 +61,9 @@ const PRECACHE = [
   './src/ui/views/address-book.js',
   './src/ui/views/extraction-table.js',
   './src/ui/views/payments-table.js',
-  './vendor/pdf.mjs',
-  './vendor/pdf.worker.mjs',
-  './vendor/pdf-lib.mjs',
+  './vendor/pdf.js',
+  './vendor/pdf.worker.js',
+  './vendor/pdf-lib.js',
 ];
 
 self.addEventListener('install', (event) => {

@@ -121,7 +121,7 @@ test('each split file is a single-page PDF', async () => {
   let cursor = view.getUint32(end + 16, true);
   const decoder = new TextDecoder();
 
-  const { PDFDocument } = await import('../vendor/pdf-lib.mjs');
+  const { PDFDocument } = await import('../vendor/pdf-lib.js');
   let checked = 0;
   for (let index = 0; index < count; index += 1) {
     const nameLength = view.getUint16(cursor + 28, true);

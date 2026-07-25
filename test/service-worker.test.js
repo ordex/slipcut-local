@@ -50,7 +50,7 @@ test('every application module is precached', async () => {
 });
 
 test('every vendored library is precached', async () => {
-  const vendored = await listRepoFiles('vendor', '.mjs');
+  const vendored = await listRepoFiles('vendor', '.js');
   if (vendored === null) return;
 
   const { precache } = await readServiceWorker();
