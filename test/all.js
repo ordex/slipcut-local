@@ -3,6 +3,7 @@
  * Every test module, in one place. Both runners import this and nothing else.
  * Keep the list alphabetical.
  */
+import './codice-fiscale.test.js';
 import './harness.test.js';
 import './iban.test.js';
 import './money.test.js';
