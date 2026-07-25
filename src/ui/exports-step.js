@@ -418,4 +418,7 @@ elements.paymentInfoId.value = `${elements.messageId.value}-PMT`;
 elements.executionDate.value = defaultExecutionDate();
 selectTab('csv');
 clearPayments();
-await refreshTemplates(saved?.csvTemplateId);
+setStatus(elements.templatesMessage, 'Caricamento tracciati…');
+// Not awaited: a top-level await here would hold up the whole module graph on a
+// fetch, and the rest of the page has no reason to wait for it.
+void refreshTemplates(saved?.csvTemplateId);

@@ -235,3 +235,24 @@ elements.downloadSummary.addEventListener('click', () => {
   if (state.pages.length === 0) return;
   downloadText(formatExtractionSummaryCsv(state.pages), 'riepilogo-estrazione.csv', 'text/csv;charset=utf-8');
 });
+
+// --- offline --------------------------------------------------------------
+
+// Registered last and never awaited: the app has to work whether or not the
+// service worker is available, and an install failure must not block startup.
+if ('serviceWorker' in navigator) {
+  const register = () => {
+    navigator.serviceWorker
+      .register(new URL('../sw.js', import.meta.url), { scope: './' })
+      .catch(() => {
+        // Unsupported, disabled by policy, or served over plain HTTP: the app
+        // simply stays online-only.
+      });
+  };
+
+  // Registration waits for load so it does not compete with the app's own
+  // startup — but `load` may already have fired, since a module graph can
+  // finish evaluating after it.
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register, { once: true });
+}

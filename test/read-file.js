@@ -27,3 +27,42 @@ export async function readRepoFile(relativePath) {
   if (!response.ok) throw new Error(`${relativePath}: HTTP ${response.status}`);
   return response.text();
 }
+
+/**
+ * Every file under a directory, repository-relative, recursively.
+ *
+ * Node only: a page cannot list a server's directories. Callers use it to check
+ * that hand-maintained file lists have not drifted, and skip that check in the
+ * browser.
+ *
+ * @param {string} relativeDirectory
+ * @param {string} extension
+ * @returns {Promise<string[] | null>} null when not running under Node
+ */
+export async function listRepoFiles(relativeDirectory, extension) {
+  if (!IN_NODE) return null;
+
+  const [{ readdir }, { fileURLToPath }] = await Promise.all([
+    import('node:fs/promises'),
+    import('node:url'),
+  ]);
+  const root = fileURLToPath(new URL('../', import.meta.url));
+
+  /**
+   * @param {string} directory relative to the repository root
+   * @returns {Promise<string[]>}
+   */
+  async function walk(directory) {
+    const entries = await readdir(`${root}${directory}`, { withFileTypes: true });
+    /** @type {string[]} */
+    const found = [];
+    for (const entry of entries) {
+      const path = `${directory}/${entry.name}`;
+      if (entry.isDirectory()) found.push(...(await walk(path)));
+      else if (entry.name.endsWith(extension)) found.push(path);
+    }
+    return found;
+  }
+
+  return walk(relativeDirectory);
+}
