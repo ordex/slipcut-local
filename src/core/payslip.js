@@ -41,7 +41,8 @@ import { toText, usefulLines } from './text-geometry.js';
  * @property {string} text the page in reading order
  */
 
-const COLLABORATOR_MARKERS = /PERCIPIENTE|COMPENSO\s+LORDO|COLLABORAT|PRESTAZIONE\s+OCCASIONALE/;
+const COLLABORATOR_MARKERS =
+  /PERCIPIENTE|COMPENSO\s+LORDO|COLLABORAT|PRESTAZIONE\s+OCCASIONALE|CO\.?\s*CO\.?\s*CO/;
 const EMPLOYEE_MARKERS = /RETRIBUZIONE|QUALIFICA|LIVELLO|COD\.?\s*FISC|NETTO/;
 
 /** Labels whose line carries the gross figure. */
