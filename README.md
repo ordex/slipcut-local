@@ -121,6 +121,21 @@ Nothing leaves the browser, and nothing is stored unless you ask:
 The PDF itself is never stored. Each of the three can be cleared from the
 interface.
 
+## GitHub Pages
+
+The site is static, so Pages serves it as it is. A workflow
+(`.github/workflows/pages.yml`) fetches the two vendored libraries, runs the test
+suite and publishes — there is nothing to compile, and no `npm install` in CI.
+
+One setting to flip once: **Settings → Pages → Source → GitHub Actions**.
+
+Everything resolves relative to the page, so a project site under
+`https://user.github.io/<repo>/` works with no configuration: the service worker
+takes the subpath as its scope, and nothing is requested from the server root.
+
+The app still talks to nobody. Pages serves the files; the payslips are read in
+the browser and never leave it.
+
 ## Docker
 
 ```sh

@@ -1,0 +1,60 @@
+name: Pages
+
+# Publish the site to GitHub Pages.
+#
+# The repository does not carry vendor/: the two libraries are pinned by version
+# and SHA-256 in tools/fetch-vendor.sh and fetched here, so the checksums stay
+# meaningful and 2.2 MB of minified upstream code stays out of the history.
+#
+# There is nothing to compile. The only reason this workflow exists is to fetch
+# those two files and to run the tests before publishing.
+#
+# One-time setup: Settings → Pages → Source → GitHub Actions.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and let a running one finish: a half-published site
+# is worse than a slightly stale one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the vendored libraries
+        run: ./tools/fetch-vendor.sh
+
+      # No install step: the suite uses no packages, so the runner's Node is
+      # enough. A red suite must not reach the site.
+      - name: Run the tests
+        run: node test/run.mjs
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp -r index.html style.css sw.js manifest.webmanifest .nojekyll \
+                config icons src vendor _site/
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
