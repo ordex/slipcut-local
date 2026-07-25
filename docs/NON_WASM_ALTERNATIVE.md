@@ -1,4 +1,4 @@
-# Alternativa senza WASM — ReScript
+# Alternative senza WASM — ReScript (raccomandato), e Python
 
 > Companion di [`RUST_PORT_PLAN.md`](./RUST_PORT_PLAN.md). Verifiche riproducibili in
 > [`docs/rescript-spike/`](./rescript-spike/). Nessun codice applicativo modificato.
@@ -246,3 +246,78 @@ linguaggio; poi ReScript su `src/core/` se si vuole la garanzia strutturale.
    WASM non sarebbe vera.
 4. **Come sopra per Rust:** doppia manutenzione durante la transizione. Qui però è molto meno
    grave, perché la migrazione è per file e non esiste una finestra in cui coesistono due app.
+
+---
+
+## 8. E Python?
+
+Verificato con misure, non a intuito (script: [`python-oracle/oracle.py`](./python-oracle/oracle.py)).
+
+**Come linguaggio dell'applicazione: no.** Ma per un motivo diverso da quello che si
+aspetterebbe, e con un'eccezione che vale la pena cogliere.
+
+### 8.1 Nel browser, Python *è* WASM — e nella variante peggiore
+
+Python nel browser significa Pyodide (CPython compilato a WASM) o PyScript. Quindi non
+soddisfa il vincolo «niente WASM»: lo soddisfa meno di tutti.
+
+- Pacchetto npm `pyodide` 314.0.3: **6,2 MB**, prima di qualunque libreria PDF. Confronto col
+  piano Rust §9: 2,0 MB raw / 833 KB gzip per l'intero stack, e 792 KB per il JS attuale.
+- **La libreria buona trascina tre estensioni native.** `pdfplumber` dipende da
+  `pdfminer.six` (→ `cryptography`, estensione Rust: `_rust.abi3.so`), `Pillow` (C) e
+  `pypdfium2` — cioè **PDFium**, lo stesso blob C++ che nel piano Rust §6.2 avevo scartato
+  per non tradire il «tutto puro». In Pyodide vanno risolti come wheel native precompilate,
+  legandosi al set di pacchetti che Pyodide distribuisce.
+- **Il ripiego puro-Python non funziona.** `pypdf` è puro Python (`cryptography` è solo un
+  extra opzionale), ma la sua geometria è inservibile per questo algoritmo. Il visitor
+  restituisce la matrice all'inizio del gruppo di testo, non per frammento:
+
+  ```
+  x= 380.00 y= 100.00 size= 10.0 'NETTO'
+  x= 380.00 y= 100.00 size= 10.0 '2.056,00'     <- x reale: 445
+  x=  60.00 y= 400.00 size=  9.0 '3.000,00'     <- x reale: 300
+  ```
+
+  Con queste coordinate `dx = 380 − 413.89 = −33.89`, fuori dalla finestra `dx >= -4` di
+  `extractNetAmountFromNettoBox`: l'importo verrebbe **scartato** e si cadrebbe nei fallback
+  testuali. Cioè si perderebbe esattamente la funzione più importante dell'app.
+
+### 8.2 Lato server: non è un port, è un altro prodotto
+
+Un backend Python (FastAPI/Flask) risolverebbe tutto tecnicamente e distruggerebbe il
+prodotto: cedolini e IBAN verrebbero **caricati su un server**, in contraddizione diretta con
+`🔒 I file restano nel browser · 0 cookie` nella pagina, col footer, col README e col testo
+della modale. In più farebbe scattare obblighi che oggi l'architettura evita *per costruzione*
+— responsabile del trattamento, DPA, retention, notifica di violazione su dati retributivi.
+Non è un compromesso di ingegneria: è la fine della ragione per cui l'app esiste.
+
+Un desktop app (PyQt + PyInstaller) manterrebbe l'elaborazione locale ma perderebbe la
+distribuzione a costo zero (niente URL, niente PWA, firma del codice per piattaforma,
+aggiornamenti da gestire).
+
+### 8.3 Dove Python è invece la scelta migliore di tutte
+
+**L'ecosistema PDF di Python è il più forte tra tutti quelli esaminati** — semplicemente non
+serve nel browser. `pdfplumber` risolve con primitive ciò che `payslip.ts` approssima con ~50
+righe di scoring a mano: `extract_words()` dà `x0/x1/top/bottom` per parola, e `crop()` legge
+direttamente una regione rettangolare. Sul PDF sintetico dello spike:
+
+```json
+{ "label": "NETTO", "amount": "2.056,00", "dx": 31.11, "dy": 0.0, "box_text": "NETTO 2.056,00" }
+```
+
+`dx = 31.11`, identico a quello calcolato dallo spike Rust e a quello che l'euristica JS
+attuale si aspetta. Il layout `collaborator` viene riconosciuto con
+`box_text: "NETTO CORRISPOSTO 1.851,00"`.
+
+Quindi la raccomandazione utile è: **Python come oracolo di test, non come applicazione.**
+
+Nella Fase 0 (§5 — la fase che serve comunque, in qualunque scenario) serve un riferimento
+indipendente per costruire il corpus golden e per validare l'estrazione su cedolini reali
+offline. Una seconda implementazione, scritta con una libreria diversa, è molto più
+convincente di aspettative scritte a mano: se `pdfplumber` e l'app concordano sul netto di
+ogni pagina, il numero è giusto; se divergono, c'è un caso da guardare.
+
+Nota: Python **è già in questo repository in quel ruolo** — `rust-port-spike/mkpdf.py` genera
+le fixture PDF sintetiche. `python-oracle/oracle.py` estende lo stesso ruolo alla verifica.
+Nessuno dei due finisce nel bundle.
